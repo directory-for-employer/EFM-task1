@@ -23,3 +23,8 @@ export interface IFindProduct {
   plu: string;
   name: string;
 }
+export interface IFindHistory {
+  shop_id: number;
+  date: Date;
+  action: string;
+}

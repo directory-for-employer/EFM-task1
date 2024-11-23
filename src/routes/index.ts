@@ -13,3 +13,4 @@ routes.post(
   ProductController.findRemainderByfilter,
 );
 routes.post("/find-product-by-filter", ProductController.findProductByfilter);
+routes.post("/find-history-by-filter", ProductController.findHistoryByfilter);

@@ -3,6 +3,7 @@ import { prisma } from "../../prisma/prisma-client";
 import { TypedRequestBody } from "../utils/utils";
 import {
   ICreateShop,
+  IFindHistory,
   IFindProduct,
   IProduct,
   IRemainder,
@@ -107,10 +108,17 @@ class ProductController {
       return res.status(400).json({ message: "Остаток не найден" });
     }
     if (quantity_shelf) {
-      const data = await prisma.quantity.update({
+      const data = await prisma.quantity.upsert({
         where: { id: quantity_id },
-        data: {
+        update: {
           quantity_shelf: { increment: quantity_shelf },
+        },
+        create: {
+          history: {
+            create: {
+              action: `quantity_shelf увеличение на ${quantity_shelf} шт`,
+            },
+          },
         },
       });
 
@@ -121,6 +129,11 @@ class ProductController {
         where: { id: quantity_id },
         data: {
           quantity_order: { increment: quantity_order },
+          history: {
+            create: {
+              action: `quantity_order увеличен на ${quantity_order} шт`,
+            },
+          },
         },
       });
 
@@ -158,6 +171,11 @@ class ProductController {
         where: { id: quantity_id },
         data: {
           quantity_shelf: { decrement: quantity_shelf },
+          history: {
+            create: {
+              action: `quantity_shelf уменьшен на ${quantity_shelf} шт`,
+            },
+          },
         },
       });
 
@@ -168,6 +186,11 @@ class ProductController {
         where: { id: quantity_id },
         data: {
           quantity_order: { decrement: quantity_order },
+          history: {
+            create: {
+              action: `quantity_order уменьшен на ${quantity_order} шт`,
+            },
+          },
         },
       });
 
@@ -263,7 +286,49 @@ class ProductController {
       });
       return res.status(200).json(data);
     }
-    // res.send("findProductByfilter");
+  }
+
+  async findHistoryByfilter(
+    req: TypedRequestBody<IFindHistory>,
+    res: Response,
+  ) {
+    const { date, shop_id, action } = req.body;
+
+    if (!date && !shop_id && !action) {
+      return res.status(400).json({ message: "Данные небыли найдены" });
+    }
+
+    if (date) {
+      const newDate = new Date(date);
+      const data = await prisma.history_action.findMany({
+        where: {
+          Date: { gte: date },
+        },
+      });
+      return res.status(200).json({ ...data, message: "Отбор по дате" });
+    }
+
+    if (shop_id) {
+      const data = await prisma.quantity.findMany({
+        where: {
+          shop: {
+            id: shop_id,
+          },
+        },
+      });
+      return res.status(200).json({ ...data, message: "Отбор по id магазина" });
+    }
+
+    if (action) {
+      const data = await prisma.history_action.findMany({
+        where: {
+          action: {
+            search: action,
+          },
+        },
+      });
+      return res.status(200).json({ ...data, message: "Отбор по action" });
+    }
   }
 }
 
