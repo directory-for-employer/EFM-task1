@@ -1,16 +1,25 @@
 export interface IProduct {
-    shop_id?: number
-    plu: number
-    name: string
-    quantity_shelf?: number
-    quantity_order?: number
+  shop_id?: number;
+  plu: string;
+  name: string;
+  quantity_shelf?: number;
+  quantity_order?: number;
 }
 
+export interface ICreateShop {
+  name: string;
+}
 
 export interface IRemainder {
-    id: number
-    plu?: number
-    name?: string
-    quantity_shelf?: number
-    quantity_order?: number
+  quantity_id: number;
+  shop_id?: number;
+  product_id?: number;
+  plu?: string;
+  quantity_shelf?: number;
+  quantity_order?: number;
+}
+
+export interface IFindProduct {
+  plu: string;
+  name: string;
 }
